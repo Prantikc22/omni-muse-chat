@@ -12,6 +12,12 @@ export interface OpenRouterResponse {
     message: {
       role: string;
       content: string;
+      images?: Array<{
+        type: string;
+        image_url: {
+          url: string;
+        };
+      }>;
     };
     finish_reason: string;
   }>;
@@ -58,9 +64,13 @@ export class OpenRouterService {
     return response.choices[0]?.message?.content || 'No response received';
   }
 
-  async sendImageMessage(messages: OpenRouterMessage[]): Promise<string> {
+  async sendImageMessage(messages: OpenRouterMessage[]): Promise<{ content: string; images?: string[] }> {
     const response = await this.makeRequest('google/gemini-2.5-flash-image-preview:free', messages);
-    return response.choices[0]?.message?.content || 'No response received';
+    const choice = response.choices[0];
+    const content = choice?.message?.content || 'No response received';
+    const images = choice?.message?.images?.map(img => img.image_url.url) || [];
+    
+    return { content, images };
   }
 }
 

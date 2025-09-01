@@ -8,43 +8,43 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Chat App Design System - Modern Dark Theme */
-    --background: 217 33% 17%;
+    /* Chat App Design System - Modern Blue Theme */
+    --background: 222 47% 11%;
     --foreground: 213 31% 91%;
 
-    --card: 217 33% 15%;
+    --card: 222 47% 9%;
     --card-foreground: 213 31% 91%;
 
-    --popover: 217 33% 15%;
+    --popover: 222 47% 9%;
     --popover-foreground: 213 31% 91%;
 
-    --primary: 142 76% 36%;
-    --primary-foreground: 217 33% 17%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 217 33% 22%;
+    --secondary: 222 47% 15%;
     --secondary-foreground: 213 31% 91%;
 
-    --muted: 217 33% 20%;
-    --muted-foreground: 217 20% 60%;
+    --muted: 222 47% 13%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217 33% 25%;
+    --accent: 222 47% 18%;
     --accent-foreground: 213 31% 91%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 25%;
-    --input: 217 33% 22%;
-    --ring: 142 76% 36%;
+    --border: 222 47% 18%;
+    --input: 222 47% 15%;
+    --ring: 217 91% 60%;
 
     /* Chat specific tokens */
-    --chat-user-bg: 142 76% 36%;
-    --chat-assistant-bg: 217 33% 22%;
-    --chat-hover: 217 33% 25%;
+    --chat-user-bg: 217 91% 60%;
+    --chat-assistant-bg: 222 47% 15%;
+    --chat-hover: 222 47% 18%;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 86% 42%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(217 33% 17%) 0%, hsl(217 33% 15%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 65%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(222 47% 9%) 100%);
     
     --radius: 0.75rem;
 

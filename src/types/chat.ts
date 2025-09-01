@@ -3,8 +3,9 @@ export interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
-  type?: 'text' | 'code' | 'image';
-  model?: string;
+  type: 'text' | 'code' | 'image';
+  model: ModelType;
+  images?: string[];
 }
 
 export interface Conversation {

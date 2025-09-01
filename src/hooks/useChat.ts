@@ -103,13 +103,23 @@ export const useChat = () => {
       }));
 
       let response: string;
+      let images: string[] | undefined;
       
       switch (modelType) {
         case 'code':
-          response = await openRouterService.sendCodeMessage(messages);
+          try {
+            response = await openRouterService.sendCodeMessage(messages);
+          } catch (error: any) {
+            if (error.message.includes('429')) {
+              throw new Error('Code model is temporarily rate-limited. Please try again later or use the Chat model for code questions.');
+            }
+            throw error;
+          }
           break;
         case 'image':
-          response = await openRouterService.sendImageMessage(messages);
+          const imageResult = await openRouterService.sendImageMessage(messages);
+          response = imageResult.content;
+          images = imageResult.images;
           break;
         default:
           response = await openRouterService.sendChatMessage(messages);
@@ -123,6 +133,7 @@ export const useChat = () => {
         timestamp: new Date(),
         type: modelType === 'image' ? 'image' : modelType === 'code' ? 'code' : 'text',
         model: modelType,
+        images,
       };
 
       addMessage(conversationId, assistantMessage);
