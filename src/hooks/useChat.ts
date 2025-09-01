@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Message, Conversation, ModelType } from '@/types/chat';
 import { openRouterService } from '@/services/openrouter';
+import { kieService } from '@/services/kie';
 import { toast } from 'sonner';
 
 export const useChat = () => {
@@ -117,9 +118,16 @@ export const useChat = () => {
           }
           break;
         case 'image':
-          const imageResult = await openRouterService.sendImageMessage(messages);
-          response = imageResult.content;
-          images = imageResult.images;
+          try {
+            const imageUrl = await kieService.generateImage({
+              prompt: content,
+              aspectRatio: '1:1'
+            });
+            response = `Generated image for: "${content}"`;
+            images = [imageUrl];
+          } catch (error: any) {
+            throw new Error(`Image generation failed: ${error.message}`);
+          }
           break;
         default:
           response = await openRouterService.sendChatMessage(messages);
