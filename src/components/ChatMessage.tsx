@@ -81,6 +81,23 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
             </div>
           )}
 
+          {/* Render videos if available */}
+          {message.videos && message.videos.length > 0 && (
+            <div className="mb-3 space-y-2">
+              {message.videos.map((videoUrl, index) => (
+                <video
+                  key={index}
+                  src={videoUrl}
+                  controls
+                  className="max-w-full h-auto rounded-lg border border-border"
+                  style={{ maxHeight: '400px' }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ))}
+            </div>
+          )}
+
           {/* Render content */}
           {isUser ? (
             <div className="whitespace-pre-wrap">{message.content}</div>

@@ -3,9 +3,10 @@ export interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
-  type: 'text' | 'code' | 'image';
+  type: 'text' | 'code' | 'image' | 'video';
   model: ModelType;
   images?: string[];
+  videos?: string[];
 }
 
 export interface Conversation {
@@ -16,7 +17,7 @@ export interface Conversation {
   updatedAt: Date;
 }
 
-export type ModelType = 'chat' | 'code' | 'image';
+export type ModelType = 'chat' | 'code' | 'image' | 'video-veo3' | 'video-bytedance';
 
 export interface ModelConfig {
   type: ModelType;

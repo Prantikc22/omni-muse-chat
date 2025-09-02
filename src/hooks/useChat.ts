@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Message, Conversation, ModelType } from '@/types/chat';
 import { openRouterService } from '@/services/openrouter';
+import { kieVideoService } from '@/services/kie';
 import { toast } from 'sonner';
 
 export const useChat = () => {
@@ -88,7 +89,7 @@ export const useChat = () => {
       content,
       role: 'user',
       timestamp: new Date(),
-      type: modelType === 'image' ? 'image' : modelType === 'code' ? 'code' : 'text',
+      type: modelType.startsWith('video') ? 'video' : modelType === 'image' ? 'image' : modelType === 'code' ? 'code' : 'text',
       model: modelType,
     };
 
@@ -104,6 +105,7 @@ export const useChat = () => {
 
       let response: string;
       let images: string[] | undefined;
+      let videos: string[] | undefined;
       
       switch (modelType) {
         case 'code':
@@ -121,6 +123,34 @@ export const useChat = () => {
           response = imageResult.content;
           images = imageResult.images;
           break;
+        case 'video-veo3':
+          response = 'Generating video with Veo3 Fast... This may take a few minutes.';
+          try {
+            videos = await kieVideoService.generateVideoComplete({
+              prompt: content,
+              model: 'veo3_fast',
+              aspectRatio: '16:9',
+              enableFallback: true,
+            });
+            response = `Video generated successfully with Veo3 Fast model! ${videos.length} video(s) created.`;
+          } catch (error: any) {
+            throw new Error(`Video generation failed: ${error.message}`);
+          }
+          break;
+        case 'video-bytedance':
+          response = 'Generating video with ByteDance V1 Pro... This may take a few minutes.';
+          try {
+            videos = await kieVideoService.generateVideoComplete({
+              prompt: content,
+              model: 'bytedance/v1-pro-text-to-video',
+              aspectRatio: '16:9',
+              enableFallback: true,
+            });
+            response = `Video generated successfully with ByteDance V1 Pro model! ${videos.length} video(s) created.`;
+          } catch (error: any) {
+            throw new Error(`Video generation failed: ${error.message}`);
+          }
+          break;
         default:
           response = await openRouterService.sendChatMessage(messages);
       }
@@ -131,9 +161,10 @@ export const useChat = () => {
         content: response,
         role: 'assistant',
         timestamp: new Date(),
-        type: modelType === 'image' ? 'image' : modelType === 'code' ? 'code' : 'text',
+        type: modelType.startsWith('video') ? 'video' : modelType === 'image' ? 'image' : modelType === 'code' ? 'code' : 'text',
         model: modelType,
         images,
+        videos,
       };
 
       addMessage(conversationId, assistantMessage);

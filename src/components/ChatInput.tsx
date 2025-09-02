@@ -33,6 +33,8 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
     { value: 'chat' as ModelType, label: 'Chat', description: 'DeepSeek Chat v3.1' },
     { value: 'code' as ModelType, label: 'Code', description: 'Qwen3 Coder' },
     { value: 'image' as ModelType, label: 'Image', description: 'Gemini 2.5 Flash Image' },
+    { value: 'video-veo3' as ModelType, label: 'Video (Veo3)', description: 'Veo3 Fast Video Generation' },
+    { value: 'video-bytedance' as ModelType, label: 'Video (ByteDance)', description: 'ByteDance V1 Pro Video' },
   ];
 
   return (
