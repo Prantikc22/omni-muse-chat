@@ -32,7 +32,92 @@ export interface VideoStatusResponse {
   };
 }
 
-export class KieVideoService {
+export interface KieImageResponse {
+  taskId: string;
+  images: string[];
+}
+
+export class KieService {
+  async generateImage(prompt: string): Promise<KieImageResponse> {
+    try {
+      const response = await fetch(`${BASE_URL}/veo/generate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          model: 'dall-e-3',
+          aspectRatio: '16:9',
+          enableFallback: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Kie API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      
+      // Poll for completion if we get a task ID
+      if (data.taskId) {
+        return await this.pollForImageCompletion(data.taskId);
+      }
+      
+      // If images are returned immediately
+      return {
+        taskId: data.taskId || 'immediate',
+        images: data.images || [],
+      };
+    } catch (error) {
+      console.error('Image generation error:', error);
+      throw new Error(`Failed to generate image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private async pollForImageCompletion(taskId: string): Promise<KieImageResponse> {
+    const maxAttempts = 30; // 5 minutes with 10-second intervals
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(`${BASE_URL}/veo/get-video-details/${taskId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Status check failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.status === 'completed' && data.images) {
+          return {
+            taskId,
+            images: data.images,
+          };
+        } else if (data.status === 'failed') {
+          throw new Error(data.error || 'Image generation failed');
+        }
+
+        // Wait 10 seconds before next attempt
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        attempts++;
+      } catch (error) {
+        console.error(`Polling attempt ${attempts + 1} failed:`, error);
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
+    }
+
+    throw new Error('Image generation timed out');
+  }
+
   async generateVideo(request: VideoGenerationRequest): Promise<string> {
     const response = await fetch(`${BASE_URL}/veo/generate`, {
       method: 'POST',
@@ -127,4 +212,5 @@ export class KieVideoService {
   }
 }
 
-export const kieVideoService = new KieVideoService();
+export const kieService = new KieService();
+export const kieVideoService = kieService; // Backwards compatibility

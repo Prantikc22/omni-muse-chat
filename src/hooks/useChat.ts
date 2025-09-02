@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Message, Conversation, ModelType } from '@/types/chat';
 import { openRouterService } from '@/services/openrouter';
-import { kieVideoService } from '@/services/kie';
+import { kieService, kieVideoService } from '@/services/kie';
 import { toast } from 'sonner';
 
 export const useChat = () => {
@@ -119,9 +119,13 @@ export const useChat = () => {
           }
           break;
         case 'image':
-          const imageResult = await openRouterService.sendImageMessage(messages);
-          response = imageResult.content;
-          images = imageResult.images;
+          try {
+            const imageResult = await kieService.generateImage(content);
+            response = 'Image generated successfully!';
+            images = imageResult.images;
+          } catch (error: any) {
+            response = `Image generation failed: ${error.message}`;
+          }
           break;
         case 'video-veo3':
           response = 'Generating video with Veo3 Fast... This may take a few minutes.';
