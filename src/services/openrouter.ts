@@ -55,13 +55,46 @@ export class OpenRouterService {
   }
 
   async sendChatMessage(messages: OpenRouterMessage[]): Promise<string> {
-    const response = await this.makeRequest('deepseek/deepseek-chat-v3.1:free', messages);
-    return response.choices[0]?.message?.content || 'No response received';
+    const chatModels = [
+      'deepseek/deepseek-chat-v3.1:free',
+      'openai/gpt-oss-120b:free',
+      'moonshotai/kimi-k2:free',
+      'tencent/hunyuan-a13b-instruct:free',
+      'meta-llama/llama-4-maverick:free',
+      'deepseek/deepseek-r1:free',
+      'meta-llama/llama-3.1-405b-instruct:free',
+      'google/gemini-2.5-pro-exp-03-25',
+    ];
+    for (const model of chatModels) {
+      try {
+        const response = await this.makeRequest(model, messages);
+        if (response.choices[0]?.message?.content) {
+          return response.choices[0].message.content;
+        }
+      } catch (err) {
+        // try next model
+      }
+    }
+    return 'No response received from any chat model';
   }
 
   async sendCodeMessage(messages: OpenRouterMessage[]): Promise<string> {
-    const response = await this.makeRequest('qwen/qwen3-coder:free', messages);
-    return response.choices[0]?.message?.content || 'No response received';
+    const codeModels = [
+      'qwen/qwen3-coder:free',
+      'moonshotai/kimi-dev-72b:free',
+      'agentica-org/deepcoder-14b-preview:free',
+    ];
+    for (const model of codeModels) {
+      try {
+        const response = await this.makeRequest(model, messages);
+        if (response.choices[0]?.message?.content) {
+          return response.choices[0].message.content;
+        }
+      } catch (err) {
+        // try next model
+      }
+    }
+    return 'No response received from any code model';
   }
 
   async sendImageMessage(messages: OpenRouterMessage[]): Promise<{ content: string; images?: string[] }> {

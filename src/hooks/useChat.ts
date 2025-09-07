@@ -76,7 +76,7 @@ export const useChat = () => {
     }));
   };
 
-  const sendMessage = async (content: string, modelType: ModelType): Promise<void> => {
+  const sendMessage = async (content: string, modelType: ModelType, fileData?: { name: string; content: string }): Promise<void> => {
     let conversationId = activeConversation;
     
     if (!conversationId) {
@@ -84,7 +84,7 @@ export const useChat = () => {
     }
 
     // Add user message
-    const userMessage: Message = {
+    let userMessage: Message = {
       id: crypto.randomUUID(),
       content,
       role: 'user',
@@ -93,15 +93,38 @@ export const useChat = () => {
       model: modelType,
     };
 
+    // If fileData, add a user message for the file upload (for UI)
+    if (fileData) {
+      const fileSnippet = fileData.content.substring(0, 200) + (fileData.content.length > 200 ? '...' : '');
+      const fileMsg: Message = {
+        id: crypto.randomUUID(),
+        content: '', // No main text, just file info
+        role: 'user',
+        timestamp: new Date(),
+        type: 'text',
+        model: modelType,
+        fileName: fileData.name,
+        fileSnippet,
+      } as any;
+      addMessage(conversationId, fileMsg);
+    }
+
     addMessage(conversationId, userMessage);
     setIsLoading(true);
 
     try {
       const currentConv = conversations.find(c => c.id === conversationId);
-      const messages = [...(currentConv?.messages || []), userMessage].map(msg => ({
+      let messages = [...(currentConv?.messages || []), userMessage].map(msg => ({
         role: msg.role,
         content: msg.content,
       }));
+      // If fileData is present, add it as a system message for context
+      if (fileData) {
+        messages = [
+          { role: 'system', content: `The following document is attached for context: ${fileData.name}\n\n${fileData.content.substring(0, 15000)}` },
+          ...messages
+        ];
+      }
 
       let response: string;
       let images: string[] | undefined;

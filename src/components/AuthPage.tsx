@@ -39,7 +39,7 @@ export const AuthPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Logicwerk Labs</h1>
+          <h1 className="brand-orbis text-4xl mb-2">Orbis</h1>
           <p className="text-muted-foreground">AI-Powered Creative Suite</p>
         </div>
         

@@ -1,4 +1,8 @@
 import { useState } from 'react';
+// You must install pdfjs-dist: npm install pdfjs-dist
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+GlobalWorkerOptions.workerSrc = pdfjsWorker;
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,21 +10,60 @@ import { Send, Loader2 } from 'lucide-react';
 import { ModelType } from '@/types/chat';
 
 interface ChatInputProps {
-  onSendMessage: (content: string, modelType: ModelType) => void;
+  onSendMessage: (content: string, modelType: ModelType, fileData?: { name: string; content: string }) => void;
   isLoading: boolean;
 }
 
 export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const [modelType, setModelType] = useState<ModelType>('chat');
+  const [file, setFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState('');
+  const [fileContent, setFileContent] = useState('');
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    setFile(selectedFile);
+    setFileName(selectedFile.name);
+
+    if (selectedFile.type === 'application/pdf') {
+      // Extract text from PDF using pdfjs-dist
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const pdf = await getDocument({ data: arrayBuffer }).promise;
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map((item: any) => item.str).join(' ') + '\n';
+      }
+      setFileContent(text);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        setFileContent(content);
+      };
+      reader.readAsText(selectedFile);
+    }
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
-      onSendMessage(message.trim(), modelType);
+      if (file && fileContent) {
+        onSendMessage(message.trim(), modelType, { name: fileName, content: fileContent });
+      } else {
+        onSendMessage(message.trim(), modelType);
+      }
       setMessage('');
+      setFile(null);
+      setFileName('');
+      setFileContent('');
     }
   };
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -70,6 +113,16 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
               className="resize-none min-h-[60px] max-h-[200px]"
               rows={3}
             />
+            {/* File input */}
+            <input
+              type="file"
+              accept=".pdf,.txt,.md,.doc,.docx"
+              onChange={handleFileChange}
+              className="mt-2 block"
+            />
+            {fileName && (
+              <div className="text-xs text-muted-foreground mt-1">Attached: {fileName}</div>
+            )}
           </div>
           
           <Button

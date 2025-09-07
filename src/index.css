@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* High-contrast chat bubbles */
+.bg-chat-user {
+  background-color: #23272e;
+  color: #f3f4f6;
+}
+.bg-chat-assistant {
+  background-color: #343942;
+  color: #f3f4f6;
+}
+.dark .bg-chat-user {
+  background-color: #23272e;
+  color: #f3f4f6;
+}
+.dark .bg-chat-assistant {
+  background-color: #343942;
+  color: #f3f4f6;
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
